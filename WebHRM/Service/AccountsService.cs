@@ -4,19 +4,19 @@ using WebHRM.Models;
 
 namespace WebHRM.Service
 {
-    public class AccountsService:IAccountsService
+    public class AccountsService : IAccountsService
     {
         private readonly HRMContext _hRMWebContext;
         public AccountsService(HRMContext hRMContext)
         {
             _hRMWebContext = hRMContext;
         }
-        public Accounts AddAccount (AddAccountDto account)
+        public Accounts AddAccount(AddAccountDto account)
         {
             var newAccount = new Accounts();
             if (account != null)
             {
-                 newAccount = new Accounts()
+                newAccount = new Accounts()
                 {
                     Id = account.Id,
                     CreateAt = DateTime.Now,
@@ -49,7 +49,7 @@ namespace WebHRM.Service
             if (account != null)
             {
                 var oldaccount = _hRMWebContext.Accounts.Where(x => x.Id == account.Id && x.DeleteAt != null).FirstOrDefault();
-                if(oldaccount != null)
+                if (oldaccount != null)
                 {
                     oldaccount.UpdateAt = DateTime.Now;
                     oldaccount.Repairer = account.Repairer;
@@ -61,25 +61,25 @@ namespace WebHRM.Service
         }
         public Accounts DeleteAccount(int Id)
         {
-                var oldaccount = _hRMWebContext.Accounts.Where(x => x.Id == Id && x.DeleteAt != null).FirstOrDefault();
-                if (oldaccount != null)
-                {
-                    oldaccount.DeleteAt = DateTime.Now;
-                }
+            var oldaccount = _hRMWebContext.Accounts.Where(x => x.Id == Id && x.DeleteAt != null).FirstOrDefault();
+            if (oldaccount != null)
+            {
+                oldaccount.DeleteAt = DateTime.Now;
+            }
             _hRMWebContext.SaveChanges();
             return oldaccount;
         }
         public List<Accounts> GetAllAccounts()
         {
-            var listAccount = _hRMWebContext.Accounts.Where(x=> x.DeleteAt == null).OrderByDescending(x=>x.UpdateAt).ToList();
+            var listAccount = _hRMWebContext.Accounts.Where(x => x.DeleteAt == null).OrderByDescending(x => x.UpdateAt).ToList();
             return listAccount;
         }
         public ResponsePageAccountDto GetAccounts(AccountDto accountDto)
         {
-            if(accountDto != null)
+            if (accountDto != null)
             {
                 var ItemQuantity = (accountDto.PageQuantity - 1) * accountDto.ItemQuantityInPage;
-                var listAccount = _hRMWebContext.Accounts.Where(x => x.DeleteAt == null).OrderByDescending(x=>x.UpdateAt).Skip(ItemQuantity).Take(accountDto.ItemQuantityInPage).ToList();
+                var listAccount = _hRMWebContext.Accounts.Where(x => x.DeleteAt == null).OrderByDescending(x => x.UpdateAt).Skip(ItemQuantity).Take(accountDto.ItemQuantityInPage).ToList();
                 var allAccount = new AllAccountDto
                 {
                     ItemQuantityInPage = accountDto.ItemQuantityInPage,
@@ -94,8 +94,8 @@ namespace WebHRM.Service
                 };
                 return respone;
             }
-            
-            
+
+
             return null;
         }
     }

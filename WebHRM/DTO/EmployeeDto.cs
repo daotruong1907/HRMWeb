@@ -1,12 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace WebHRM.Models
+﻿namespace WebHRM.DTO
 {
-    public class EmployeeInformation
+    public class EmployeeDto
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string Name { get; set; }
         public DateTime BirthDay { get; set; }
@@ -19,6 +14,5 @@ namespace WebHRM.Models
         public string? Repairer { get; set; }
         public DateTime UpdateAt { get; set; }
         public DateTime? DeleteAt { get; set; }
-        public virtual Accounts Accounts { get; set; }
     }
 }
