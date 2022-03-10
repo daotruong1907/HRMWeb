@@ -2,7 +2,6 @@
 {
     public class EmployeeDto
     {
-        public int Id { get; set; }
         public string Name { get; set; }
         public DateTime BirthDay { get; set; }
         public string? Sex { get; set; }
@@ -13,6 +12,48 @@
         public DateTime CreateAt { get; set; }
         public string? Repairer { get; set; }
         public DateTime UpdateAt { get; set; }
-        public DateTime? DeleteAt { get; set; }
+    }
+
+    public class EmployeeInformationDto
+    {
+        public EmployeeDto Employee { get; set; }
+        public AddAccountDto Account { get; set; }
+    }
+
+    public class UpdateEmployeeDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public DateTime BirthDay { get; set; }
+        public string? Sex { get; set; }
+        public string PhoneNumber { get; set; }
+        public string? Email { get; set; }
+        public string? Repairer { get; set; }
+        public DateTime UpdateAt { get; set; }
+    }
+
+    public class ResponseSearchEmployee
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public DateTime BirthDay { get; set; }
+        public string? Sex { get; set; }
+        public string PhoneNumber { get; set; }
+        public string? Email { get; set; }
+    }
+
+    public class RequestSearchEmployee
+    {
+        public PageDto PageDto{get;set;}
+        public ParamSearchEmployee ParamSearchEmployee { get;set;}
+    }
+
+    public class ParamSearchEmployee
+    {
+        public string? NameOrEmail { get; set; }
+        public DateTime? FromBirthDay { get; set; }
+        public DateTime? ToBirthDay { get; set; }
+        public string? Sex { get; set; }
+        public string? PhoneNumber { get; set; }
     }
 }

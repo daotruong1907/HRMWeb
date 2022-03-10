@@ -2,7 +2,7 @@
 
 namespace WebHRM.DTO
 {
-    public class AccountDto
+    public class PageDto
     {
         public int PageQuantity { get; set; }
         public int ItemQuantityInPage { get; set; }

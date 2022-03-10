@@ -74,18 +74,18 @@ namespace WebHRM.Service
             var listAccount = _hRMWebContext.Accounts.Where(x => x.DeleteAt == null).OrderByDescending(x => x.UpdateAt).ToList();
             return listAccount;
         }
-        public ResponsePageAccountDto GetAccounts(AccountDto accountDto)
+        public ResponsePageAccountDto GetAccounts(PageDto pageDto)
         {
-            if (accountDto != null)
+            if (pageDto != null)
             {
-                var ItemQuantity = (accountDto.PageQuantity - 1) * accountDto.ItemQuantityInPage;
-                var listAccount = _hRMWebContext.Accounts.Where(x => x.DeleteAt == null).OrderByDescending(x => x.UpdateAt).Skip(ItemQuantity).Take(accountDto.ItemQuantityInPage).ToList();
+                var ItemQuantity = (pageDto.PageQuantity - 1) * pageDto.ItemQuantityInPage;
+                var listAccount = _hRMWebContext.Accounts.Where(x => x.DeleteAt == null).OrderByDescending(x => x.UpdateAt).Skip(ItemQuantity).Take(pageDto.ItemQuantityInPage).ToList();
                 var allAccount = new AllAccountDto
                 {
-                    ItemQuantityInPage = accountDto.ItemQuantityInPage,
-                    PageQuantity = accountDto.PageQuantity,
+                    ItemQuantityInPage = pageDto.ItemQuantityInPage,
+                    PageQuantity = pageDto.PageQuantity,
                     TotalItem = _hRMWebContext.Accounts.Count(),
-                    TotalPage = Math.Ceiling((decimal)_hRMWebContext.Accounts.Count() / accountDto.ItemQuantityInPage)
+                    TotalPage = Math.Ceiling((decimal)_hRMWebContext.Accounts.Count() / pageDto.ItemQuantityInPage)
                 };
                 var respone = new ResponsePageAccountDto
                 {

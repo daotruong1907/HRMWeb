@@ -9,6 +9,6 @@ namespace WebHRM.Interface
         Accounts UpdateAccount(UpdateAccountDto accounts);
         Accounts DeleteAccount(int Id);
         List<Accounts> GetAllAccounts();
-        ResponsePageAccountDto GetAccounts(AccountDto accountDto);
+        ResponsePageAccountDto GetAccounts(PageDto pageDto);
     }
 }

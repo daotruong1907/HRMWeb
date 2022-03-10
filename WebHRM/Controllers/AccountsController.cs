@@ -45,9 +45,9 @@ namespace WebHRM.Controllers
         }
 
         [HttpGet("GetAccounts")]
-        public ResponsePageAccountDto GetAccounts(AccountDto accountDto)
+        public ResponsePageAccountDto GetAccounts(PageDto pageDto)
         {
-            var result = _accountsService.GetAccounts(accountDto);
+            var result = _accountsService.GetAccounts(pageDto);
             return result;
         }
 
