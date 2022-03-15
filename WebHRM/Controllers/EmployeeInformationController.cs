@@ -25,7 +25,7 @@ namespace WebHRM.Controllers
         }
 
         [HttpPost("UpdateEmployee")]
-        public bool UpdateEmployee(UpdateEmployeeDto updateEmployeeDto)
+        public string UpdateEmployee(UpdateEmployeeDto updateEmployeeDto)
         {
             var result = _employeeService.UpdateEmployee(updateEmployeeDto);
             return result;

@@ -18,6 +18,7 @@
     {
         public EmployeeDto Employee { get; set; }
         public AddAccountDto Account { get; set; }
+        public string ResponseFromServer { get;set; }
     }
 
     public class UpdateEmployeeDto

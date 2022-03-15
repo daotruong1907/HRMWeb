@@ -31,6 +31,12 @@ namespace WebHRM.Service
             var employeeInformationDto = new EmployeeInformationDto();
             if (employeeDto != null)
             {
+                var checkUnique = _hRMWebContext.EmployeeInformation.Where(x => x.Email == employeeDto.Email || x.PhoneNumber == employeeDto.PhoneNumber).FirstOrDefault();
+                if (checkUnique != null)
+                {
+                    employeeInformationDto.ResponseFromServer = "Email hoặc số điện thoại này đã được " + checkUnique.Name + " sử dụng";
+                    return employeeInformationDto;
+                }
                 var newEmployee = new EmployeeInformation
                 {
                     Name = employeeDto.Name,
@@ -66,10 +72,15 @@ namespace WebHRM.Service
             return employeeInformationDto;
         }
 
-        public bool UpdateEmployee(UpdateEmployeeDto updateEmployeeDto)
+        public string UpdateEmployee(UpdateEmployeeDto updateEmployeeDto)
         {
             if (updateEmployeeDto != null)
             {
+                var checkUnique = _hRMWebContext.EmployeeInformation.Where(x => x.Email == updateEmployeeDto.Email || x.PhoneNumber == updateEmployeeDto.PhoneNumber).FirstOrDefault();
+                if (checkUnique != null)
+                {
+                    return "Email hoặc số điện thoại này đã được " + checkUnique.Name + " sử dụng";
+                }
                 var oldEmployee = _hRMWebContext.EmployeeInformation.Where(x => x.Id == updateEmployeeDto.Id && x.DeleteAt == null).FirstOrDefault();
                 if (oldEmployee != null)
                 {
@@ -82,9 +93,9 @@ namespace WebHRM.Service
                     oldEmployee.UpdateAt = DateTime.Now;
                 }
                 _hRMWebContext.SaveChanges();
-                return true;
+                return "Sửa thành công";
             }
-            return false;
+            return "Sửa thất bại";
         }
 
         public bool DeleteEmployee(int id)

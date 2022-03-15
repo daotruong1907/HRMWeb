@@ -8,7 +8,7 @@ namespace WebHRM.Interface
     public interface IEmployeeService
     {
         EmployeeInformationDto AddEmployee(EmployeeDto employeeDto);
-        bool UpdateEmployee(UpdateEmployeeDto updateEmployeeDto);
+        string UpdateEmployee(UpdateEmployeeDto updateEmployeeDto);
         bool DeleteEmployee(int id);
         //List<Accounts> GetAllEmployees();
         //ResponsePageAccountDto GetEmployees(AccountDto accountDto);
