@@ -21,8 +21,20 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<IAccountsService, AccountsService>();
 builder.Services.AddTransient<IEmployeeService, EmployeeService>();
 builder.Services.AddTransient<ILoginService, LoginService>();
+//var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy(name: MyAllowSpecificOrigins,
+//                      builder =>
+//                      {
+//                          builder.WithOrigins("https://localhost:7105/",
+//                                              "https://localhost:3000/");
+//                      });
+//});
 
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -30,6 +42,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseCors(c => c.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
 app.UseHttpsRedirection();
 

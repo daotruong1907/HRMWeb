@@ -11,6 +11,16 @@ namespace WebHRM.Service
         {
             _hRMWebContext = hRMContext;
         }
+        /// <summary>Creates the m d5.</summary>
+        /// <param name="input">The input.</param>
+        /// <returns>
+        ///   <br />
+        /// </returns>
+        /// <Modified>
+        /// Name Date Comments
+        /// truongdv 16/03/2022 created
+        /// Mã hóa MD5
+        /// </Modified>
         public string CreateMD5(string input)
         {
             // Use input string to calculate MD5 hash
@@ -30,6 +40,15 @@ namespace WebHRM.Service
                 // return sb.ToString();
             }
         }
+        /// <summary>Adds the account.</summary>
+        /// <param name="account">The account.</param>
+        /// <returns>
+        ///   <br />
+        /// </returns>
+        /// <Modified>
+        /// Name Date Comments
+        /// truongdv 16/03/2022 created
+        /// </Modified>
         public Accounts AddAccount(AddAccountDto account)
         {
             var newAccount = new Accounts();
@@ -63,6 +82,15 @@ namespace WebHRM.Service
             return newAccount;
         }
 
+        /// <summary>Updates the account.</summary>
+        /// <param name="account">The account.</param>
+        /// <returns>
+        ///   <br />
+        /// </returns>
+        /// <Modified>
+        /// Name Date Comments
+        /// truongdv 16/03/2022 created
+        /// </Modified>
         public Accounts UpdateAccount(UpdateAccountDto account)
         {
             var oldAccount = new Accounts();
@@ -79,6 +107,15 @@ namespace WebHRM.Service
             }
             return oldAccount;
         }
+        /// <summary>Deletes the account.</summary>
+        /// <param name="Id">The identifier.</param>
+        /// <returns>
+        ///   <br />
+        /// </returns>
+        /// <Modified>
+        /// Name Date Comments
+        /// truongdv 16/03/2022 created
+        /// </Modified>
         public Accounts DeleteAccount(int Id)
         {
             var oldaccount = _hRMWebContext.Accounts.Where(x => x.Id == Id && x.DeleteAt != null).FirstOrDefault();
@@ -89,11 +126,28 @@ namespace WebHRM.Service
             _hRMWebContext.SaveChanges();
             return oldaccount;
         }
+        /// <summary>Gets all accounts.</summary>
+        /// <returns>
+        ///   <br />
+        /// </returns>
+        /// <Modified>
+        /// Name Date Comments
+        /// truongdv 16/03/2022 created
+        /// </Modified>
         public List<Accounts> GetAllAccounts()
         {
             var listAccount = _hRMWebContext.Accounts.Where(x => x.DeleteAt == null).OrderByDescending(x => x.UpdateAt).ToList();
             return listAccount;
         }
+        /// <summary>Gets the accounts.</summary>
+        /// <param name="pageDto">The page dto.</param>
+        /// <returns>
+        ///   <br />
+        /// </returns>
+        /// <Modified>
+        /// Name Date Comments
+        /// truongdv 16/03/2022 created
+        /// </Modified>
         public ResponsePageAccountDto GetAccounts(PageDto pageDto)
         {
             if (pageDto != null)
@@ -114,8 +168,6 @@ namespace WebHRM.Service
                 };
                 return respone;
             }
-
-
             return null;
         }
     }

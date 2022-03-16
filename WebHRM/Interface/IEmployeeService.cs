@@ -13,5 +13,6 @@ namespace WebHRM.Interface
         //List<Accounts> GetAllEmployees();
         //ResponsePageAccountDto GetEmployees(AccountDto accountDto);
         List<ResponseSearchEmployee> SearchEmployee(RequestSearchEmployee requestSearchEmployee);
+        bool isPhoneNumber(string phoneNumber);
     }
 }

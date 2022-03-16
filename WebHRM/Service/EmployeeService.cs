@@ -16,7 +16,68 @@ namespace WebHRM.Service
             _hRMWebContext = hRMContext;
             _accountsService = accountsService;
         }
-
+        public bool IsNumber(string pValue)
+        {
+            foreach (Char c in pValue)
+            {
+                if (!Char.IsDigit(c))
+                    return false;
+            }
+            return true;
+        }
+        public bool isPhoneNumber(string phoneNumber)
+        {
+            if(!string.IsNullOrEmpty(phoneNumber))
+            {
+                var trimPhoneNumber = phoneNumber.Trim();
+                if(trimPhoneNumber.Length == 11 || trimPhoneNumber.Length == 10)
+                {
+                    var splitPhoneNumber = trimPhoneNumber.Split(' ');
+                    if(splitPhoneNumber.Length > 1)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        if(IsNumber(splitPhoneNumber[0]))
+                        {
+                            if (splitPhoneNumber[0].Length ==11)
+                            {
+                                var strAreaCode = "84";
+                                if ( splitPhoneNumber[0].Substring(0, 2).Equals(strAreaCode))
+                                {
+                                    var ignoreAreaCode = splitPhoneNumber[0].Substring(2);
+                                    ignoreAreaCode = "0" + ignoreAreaCode;
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                            else
+                            {
+                                var strAreaCode = "0";
+                                if (splitPhoneNumber[0].Substring(0, 1).Equals(strAreaCode))
+                                {
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                        }
+                        else
+                        { 
+                            return false;
+                        }
+                    }
+                }
+                return false;
+            }
+            return false;
+        }
         /// <summary>Adds the employee.</summary>
         /// <param name="employeeDto">The employee dto.</param>
         /// <returns>
@@ -131,6 +192,10 @@ namespace WebHRM.Service
             var listEmployee = new List<ResponseSearchEmployee>();
             if(requestSearchEmployee.ParamSearchEmployee != null)
             {
+                if (requestSearchEmployee.ParamSearchEmployee.FromBirthDay > requestSearchEmployee.ParamSearchEmployee.ToBirthDay)
+                {
+                    return listEmployee;
+                }
                 var responseEmployee = _hRMWebContext.EmployeeInformation.Select(x=> new ResponseSearchEmployee
                 {
                     Name = x.Name,
@@ -148,9 +213,21 @@ namespace WebHRM.Service
                 {
                     responseEmployee = responseEmployee.Where(x => x.PhoneNumber == requestSearchEmployee.ParamSearchEmployee.PhoneNumber);
                 }
-                if (requestSearchEmployee.ParamSearchEmployee.FromBirthDay != null && requestSearchEmployee.ParamSearchEmployee.ToBirthDay != null)
+                if (requestSearchEmployee.ParamSearchEmployee.FromBirthDay != null || requestSearchEmployee.ParamSearchEmployee.ToBirthDay != null)
                 {
-                    responseEmployee = responseEmployee.Where(x => x.BirthDay >= requestSearchEmployee.ParamSearchEmployee.FromBirthDay && x.BirthDay <= requestSearchEmployee.ParamSearchEmployee.ToBirthDay);
+                    if(requestSearchEmployee.ParamSearchEmployee.FromBirthDay != null && requestSearchEmployee.ParamSearchEmployee.ToBirthDay != null)
+                    {
+                        responseEmployee = responseEmployee.Where(x => x.BirthDay >= requestSearchEmployee.ParamSearchEmployee.FromBirthDay && x.BirthDay <= requestSearchEmployee.ParamSearchEmployee.ToBirthDay);
+                    }
+                    else if(requestSearchEmployee.ParamSearchEmployee.FromBirthDay != null && requestSearchEmployee.ParamSearchEmployee.ToBirthDay == null)
+                    {
+                        responseEmployee = responseEmployee.Where(x => x.BirthDay >= requestSearchEmployee.ParamSearchEmployee.FromBirthDay);
+                    }
+                    else
+                    {
+                        responseEmployee = responseEmployee.Where(x => x.BirthDay <= requestSearchEmployee.ParamSearchEmployee.ToBirthDay);
+
+                    }
                 }
                 if (!string.IsNullOrEmpty(requestSearchEmployee.ParamSearchEmployee.NameOrEmail))
                 {
