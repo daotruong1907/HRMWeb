@@ -12,7 +12,7 @@ namespace WebHRM.Interface
         bool DeleteEmployee(int id);
         //List<Accounts> GetAllEmployees();
         //ResponsePageAccountDto GetEmployees(AccountDto accountDto);
-        List<ResponseSearchEmployee> SearchEmployee(RequestSearchEmployee requestSearchEmployee);
+        ListResponseSearchEmployee SearchEmployee(RequestSearchEmployee requestSearchEmployee);
         bool isPhoneNumber(string phoneNumber);
     }
 }

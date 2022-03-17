@@ -33,6 +33,12 @@
         public DateTime UpdateAt { get; set; }
     }
 
+    public class ListResponseSearchEmployee
+    {
+        public List<ResponseSearchEmployee> ResponseSearchEmployees { get; set; } = new List<ResponseSearchEmployee>();
+        public string ResponseFromServer { get;set; }
+
+    }
     public class ResponseSearchEmployee
     {
         public int Id { get; set; }

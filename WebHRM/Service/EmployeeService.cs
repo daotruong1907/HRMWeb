@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using WebHRM.Constant;
 using WebHRM.DTO;
 using WebHRM.Interface;
 using WebHRM.Models;
@@ -46,8 +47,8 @@ namespace WebHRM.Service
                                 var strAreaCode = "84";
                                 if ( splitPhoneNumber[0].Substring(0, 2).Equals(strAreaCode))
                                 {
-                                    var ignoreAreaCode = splitPhoneNumber[0].Substring(2);
-                                    ignoreAreaCode = "0" + ignoreAreaCode;
+                                   // var ignoreAreaCode = splitPhoneNumber[0].Substring(2);
+                                   // ignoreAreaCode = "0" + ignoreAreaCode;
                                     return true;
                                 }
                                 else
@@ -78,6 +79,30 @@ namespace WebHRM.Service
             }
             return false;
         }
+        public string ChangeAreaCode(string phoneNumber)
+        {
+            if(!string.IsNullOrEmpty(phoneNumber))
+            {
+                var strAreaCode = "84";
+                if (phoneNumber.Substring(0, 2).Equals(strAreaCode))
+                {
+                    var ignoreAreaCode = phoneNumber.Substring(2);
+                    ignoreAreaCode = "0" + ignoreAreaCode;
+                    return ignoreAreaCode;
+                }
+            }
+            return phoneNumber;
+        }
+        public bool CheckAge(DateTime birthday)
+        {
+            var now = DateTime.Now;
+            TimeSpan age = now - birthday;
+            if (age.Days > 6570)
+            {
+                return true;
+            }
+            return false;
+        }
         /// <summary>Adds the employee.</summary>
         /// <param name="employeeDto">The employee dto.</param>
         /// <returns>
@@ -90,28 +115,61 @@ namespace WebHRM.Service
         public EmployeeInformationDto AddEmployee(EmployeeDto employeeDto)
         {
             var employeeInformationDto = new EmployeeInformationDto();
-            if (employeeDto != null)
+            if (employeeDto.Name != null && employeeDto.BirthDay != null && employeeDto.PhoneNumber != null && employeeDto.Password != null)
             {
-                var checkUnique = _hRMWebContext.EmployeeInformation.Where(x => x.Email == employeeDto.Email || x.PhoneNumber == employeeDto.PhoneNumber).FirstOrDefault();
-                if (checkUnique != null)
+                var numberPhone = employeeDto.PhoneNumber;
+                if (isPhoneNumber(employeeDto.PhoneNumber))
                 {
-                    employeeInformationDto.ResponseFromServer = "Email hoặc số điện thoại này đã được " + checkUnique.Name + " sử dụng";
-                    return employeeInformationDto;
+                    numberPhone = ChangeAreaCode(numberPhone);
                 }
+                if (employeeDto.Email != null)
+                {
+                    var checkUnique = _hRMWebContext.EmployeeInformation.Where(x => x.Email == employeeDto.Email || x.PhoneNumber == numberPhone).FirstOrDefault();
+                    if (checkUnique != null)
+                    {
+                        employeeInformationDto.ResponseFromServer = "Email hoặc số điện thoại này đã được " + checkUnique.Name + " sử dụng";
+                        return employeeInformationDto;
+                    }
+                }
+                if(!CheckAge(employeeDto.BirthDay))
+                {
+                        employeeInformationDto.ResponseFromServer = "Chưa đủ 18 tuổi";
+                        return employeeInformationDto;
+                }
+                var sex = "";
+                if (employeeDto.Sex != null)
+                {
+                    if(sex != SexType.MALE || sex != SexType.FEMALE)
+                    {
+                        employeeInformationDto.ResponseFromServer = "Không có giới tính này";
+                        return employeeInformationDto;
+                    }
+                    sex = employeeDto.Sex.ToLower();
+                }
+                var email = "";
+                if(email != null)
+                {
+                    if(!ValidateEmail(email))
+                    {
+                        employeeInformationDto.ResponseFromServer = "Email không đúng định dạng";
+                        return employeeInformationDto;
+                    }
+                    email = employeeDto.Email.ToLower();
+                }    
                 var newEmployee = new EmployeeInformation
                 {
                     Name = employeeDto.Name,
                     BirthDay = employeeDto.BirthDay,
-                    Sex = employeeDto.Sex,
-                    PhoneNumber = employeeDto.PhoneNumber,
-                    Email = employeeDto.Email,
+                    Sex = sex,
+                    PhoneNumber = numberPhone,
+                    Email = email,
                     CreateAt = DateTime.Now,
                     UpdateAt = DateTime.Now,
                     Creator = employeeDto.Creator,
                 };
                 _hRMWebContext.EmployeeInformation.Add(newEmployee);
                 _hRMWebContext.SaveChanges();
-                var employee = _hRMWebContext.EmployeeInformation.Where(x => x.PhoneNumber == employeeDto.PhoneNumber && x.DeleteAt == null).FirstOrDefault();
+                var employee = _hRMWebContext.EmployeeInformation.Where(x => x.PhoneNumber == numberPhone && x.DeleteAt == null).FirstOrDefault();
                 if (employee != null)
                 {
                     var addAccount = new AddAccountDto
@@ -135,19 +193,47 @@ namespace WebHRM.Service
 
         public string UpdateEmployee(UpdateEmployeeDto updateEmployeeDto)
         {
-            if (updateEmployeeDto != null)
+            if (updateEmployeeDto.Name != null && updateEmployeeDto.BirthDay != null && updateEmployeeDto.PhoneNumber != null)
             {
-                var checkUnique = _hRMWebContext.EmployeeInformation.Where(x => x.Email == updateEmployeeDto.Email || x.PhoneNumber == updateEmployeeDto.PhoneNumber).FirstOrDefault();
-                if (checkUnique != null)
+                var numberPhone = updateEmployeeDto.PhoneNumber;
+                if (isPhoneNumber(updateEmployeeDto.PhoneNumber))
                 {
-                    return "Email hoặc số điện thoại này đã được " + checkUnique.Name + " sử dụng";
+                    numberPhone = ChangeAreaCode(numberPhone);
+                }
+                if (updateEmployeeDto.Email != null)
+                {
+                    var checkUnique = _hRMWebContext.EmployeeInformation.Where(x => x.Email == updateEmployeeDto.Email || x.PhoneNumber == numberPhone).FirstOrDefault();
+                    if (checkUnique != null)
+                    {
+                        return "Email hoặc số điện thoại này đã được " + checkUnique.Name + " sử dụng";
+                    }
+                }
+                if (!CheckAge(updateEmployeeDto.BirthDay))
+                {
+                    return "Chưa đủ 18 tuổi";
+                }
+                var email = updateEmployeeDto.Email.ToLower();
+                if (email != null)
+                {
+                    if (!ValidateEmail(email))
+                    {
+                        return "Email không đúng định dạng";
+                    }
+                }
+                var sex = updateEmployeeDto.Sex.ToLower();
+                if (updateEmployeeDto.Sex != null)
+                {
+                    if (sex != SexType.MALE || sex != SexType.FEMALE)
+                    {
+                        return "Không có giới tính này";
+                    }
                 }
                 var oldEmployee = _hRMWebContext.EmployeeInformation.Where(x => x.Id == updateEmployeeDto.Id && x.DeleteAt == null).FirstOrDefault();
                 if (oldEmployee != null)
                 {
                     oldEmployee.Name = updateEmployeeDto.Name;
                     oldEmployee.Email = updateEmployeeDto.Email;
-                    oldEmployee.PhoneNumber = updateEmployeeDto.PhoneNumber;
+                    oldEmployee.PhoneNumber = numberPhone;
                     oldEmployee.Sex = updateEmployeeDto.Sex;
                     oldEmployee.BirthDay = updateEmployeeDto.BirthDay;
                     oldEmployee.Repairer = updateEmployeeDto.Repairer;
@@ -187,14 +273,16 @@ namespace WebHRM.Service
                 return false;
         }
 
-        public List<ResponseSearchEmployee> SearchEmployee(RequestSearchEmployee requestSearchEmployee)
+        public ListResponseSearchEmployee SearchEmployee(RequestSearchEmployee requestSearchEmployee)
         {
+            ListResponseSearchEmployee responseSearchEmployees = new ListResponseSearchEmployee();
             var listEmployee = new List<ResponseSearchEmployee>();
             if(requestSearchEmployee.ParamSearchEmployee != null)
             {
                 if (requestSearchEmployee.ParamSearchEmployee.FromBirthDay > requestSearchEmployee.ParamSearchEmployee.ToBirthDay)
                 {
-                    return listEmployee;
+                    responseSearchEmployees.ResponseFromServer = "Từ ngày lớn hơn đến ngày";
+                    return responseSearchEmployees;
                 }
                 var responseEmployee = _hRMWebContext.EmployeeInformation.Select(x=> new ResponseSearchEmployee
                 {
@@ -205,7 +293,7 @@ namespace WebHRM.Service
                     PhoneNumber = x.PhoneNumber,
                     Sex = x.Sex,
                 });
-                if(!string.IsNullOrEmpty(requestSearchEmployee.ParamSearchEmployee.Sex))
+                if(!string.IsNullOrEmpty(requestSearchEmployee.ParamSearchEmployee.Sex) && !requestSearchEmployee.ParamSearchEmployee.Sex.Equals("ALL"))
                 {
                     responseEmployee =  responseEmployee.Where(y=> y.Sex == requestSearchEmployee.ParamSearchEmployee.Sex);
                 }
@@ -244,8 +332,9 @@ namespace WebHRM.Service
                 var ItemQuantity = (requestSearchEmployee.PageDto.PageQuantity - 1) * requestSearchEmployee.PageDto.ItemQuantityInPage;
                 responseEmployee = responseEmployee.Skip(ItemQuantity).Take(requestSearchEmployee.PageDto.ItemQuantityInPage);
                 listEmployee = responseEmployee.ToList();
+                responseSearchEmployees.ResponseSearchEmployees = responseEmployee.ToList(); 
             }
-            return listEmployee;
+            return responseSearchEmployees;
         }
     }
 }

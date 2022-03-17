@@ -31,7 +31,7 @@ namespace WebHRM.Controllers
             return result;
         }
 
-        [HttpPost("DeleteEmployee")]
+        [HttpDelete("DeleteEmployee")]
         public bool DeleteEmployee(int id)
         {
             var result = _employeeService.DeleteEmployee(id);
@@ -39,15 +39,9 @@ namespace WebHRM.Controllers
         }
 
         [HttpPost("SearchEmployee")]
-        public List<ResponseSearchEmployee> SearchEmployee(RequestSearchEmployee requestSearchEmployee)
+        public ListResponseSearchEmployee SearchEmployee(RequestSearchEmployee requestSearchEmployee)
         {
             var result = _employeeService.SearchEmployee(requestSearchEmployee);
-            return result;
-        }
-        [HttpPost("isPhoneNumber")]
-        public bool isPhoneNumber(string a)
-        {
-            var result = _employeeService.isPhoneNumber(a);
             return result;
         }
     }
