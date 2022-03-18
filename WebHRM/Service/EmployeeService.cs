@@ -284,7 +284,7 @@ namespace WebHRM.Service
                     responseSearchEmployees.ResponseFromServer = "Từ ngày lớn hơn đến ngày";
                     return responseSearchEmployees;
                 }
-                var responseEmployee = _hRMWebContext.EmployeeInformation.Select(x=> new ResponseSearchEmployee
+                var responseEmployee = _hRMWebContext.EmployeeInformation.Where(x=> x.DeleteAt == null).Select(x=> new ResponseSearchEmployee
                 {
                     Name = x.Name,
                     Email = x.Email,
