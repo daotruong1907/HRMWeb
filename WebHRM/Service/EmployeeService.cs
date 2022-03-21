@@ -30,7 +30,7 @@ namespace WebHRM.Service
         {
             if(!string.IsNullOrEmpty(phoneNumber))
             {
-                var trimPhoneNumber = phoneNumber.Trim();
+                string trimPhoneNumber = phoneNumber.Trim();
                 if(trimPhoneNumber.Length == 11 || trimPhoneNumber.Length == 10)
                 {
                     var splitPhoneNumber = trimPhoneNumber.Split(' ');
@@ -44,7 +44,7 @@ namespace WebHRM.Service
                         {
                             if (splitPhoneNumber[0].Length ==11)
                             {
-                                var strAreaCode = "84";
+                                string strAreaCode = "84";
                                 if ( splitPhoneNumber[0].Substring(0, 2).Equals(strAreaCode))
                                 {
                                    // var ignoreAreaCode = splitPhoneNumber[0].Substring(2);
@@ -58,7 +58,7 @@ namespace WebHRM.Service
                             }
                             else
                             {
-                                var strAreaCode = "0";
+                                string strAreaCode = "0";
                                 if (splitPhoneNumber[0].Substring(0, 1).Equals(strAreaCode))
                                 {
                                     return true;
@@ -83,10 +83,10 @@ namespace WebHRM.Service
         {
             if(!string.IsNullOrEmpty(phoneNumber))
             {
-                var strAreaCode = "84";
+                string strAreaCode = "84";
                 if (phoneNumber.Substring(0, 2).Equals(strAreaCode))
                 {
-                    var ignoreAreaCode = phoneNumber.Substring(2);
+                    string ignoreAreaCode = phoneNumber.Substring(2);
                     ignoreAreaCode = "0" + ignoreAreaCode;
                     return ignoreAreaCode;
                 }
@@ -95,6 +95,7 @@ namespace WebHRM.Service
         }
         public bool CheckAge(DateTime birthday)
         {
+            //fixme: dùng hàm subtract để trừ ngày
             var now = DateTime.Now;
             TimeSpan age = now - birthday;
             if (age.Days > 6570)
@@ -115,79 +116,107 @@ namespace WebHRM.Service
         public EmployeeInformationDto AddEmployee(EmployeeDto employeeDto)
         {
             var employeeInformationDto = new EmployeeInformationDto();
+            StringBuilder responseFromServer = new StringBuilder();
             if (employeeDto.Name != null && employeeDto.BirthDay != null && employeeDto.PhoneNumber != null && employeeDto.Password != null)
             {
-                var numberPhone = employeeDto.PhoneNumber;
+                string numberPhone = employeeDto.PhoneNumber;
                 if (isPhoneNumber(employeeDto.PhoneNumber))
                 {
                     numberPhone = ChangeAreaCode(numberPhone);
                 }
-                if (employeeDto.Email != null)
+                else
                 {
-                    var checkUnique = _hRMWebContext.EmployeeInformation.Where(x => x.Email == employeeDto.Email || x.PhoneNumber == numberPhone).FirstOrDefault();
+                    responseFromServer.Append("Số điện thoại không đúng định dạng");
+                    employeeInformationDto.isSuccess = false;
+                }
+                string email = "";
+                if (!string.IsNullOrEmpty(employeeDto.Email))
+                {
+                    if (!ValidateEmail(employeeDto.Email))
+                    {
+                        //  employeeInformationDto.ResponseFromServer = "Email không đúng định dạng";
+                        responseFromServer.Append("Email không đúng định dạng");
+                    }
+                    else
+                    {
+                        email = employeeDto.Email.ToLower();
+                    }
+                }
+                if (string.IsNullOrEmpty(email))
+                {
+                    var checkUnique = _hRMWebContext.EmployeeInformation.Where(x => x.PhoneNumber == numberPhone).FirstOrDefault();
                     if (checkUnique != null)
                     {
-                        employeeInformationDto.ResponseFromServer = "Email hoặc số điện thoại này đã được " + checkUnique.Name + " sử dụng";
-                        return employeeInformationDto;
+                        //employeeInformationDto.ResponseFromServer = "Email hoặc số điện thoại này đã được " + checkUnique.Name + " sử dụng";
+                        responseFromServer.Append("Số điện thoại này đã được " + checkUnique.Name + " sử dụng");
+                        employeeInformationDto.isSuccess = false;
                     }
                 }
+                else
+                {
+                    var checkUnique = _hRMWebContext.EmployeeInformation.Where(x => x.Email == email || x.PhoneNumber == numberPhone).FirstOrDefault();
+                    if (checkUnique != null)
+                    {
+                        //employeeInformationDto.ResponseFromServer = "Email hoặc số điện thoại này đã được " + checkUnique.Name + " sử dụng";
+                        responseFromServer.Append("Email hoặc số điện thoại này đã được " + checkUnique.Name + " sử dụng");
+                        employeeInformationDto.isSuccess = false;
+                    }
+                }                   
                 if(!CheckAge(employeeDto.BirthDay))
                 {
-                        employeeInformationDto.ResponseFromServer = "Chưa đủ 18 tuổi";
-                        return employeeInformationDto;
+                      //  employeeInformationDto.ResponseFromServer = "Chưa đủ 18 tuổi";
+                        responseFromServer.Append("Chưa đủ 18 tuổi");
+                    employeeInformationDto.isSuccess = false;
                 }
-                var sex = "";
-                if (employeeDto.Sex != null)
+                string sex = "";
+                if (!string.IsNullOrEmpty(employeeDto.Sex))
                 {
-                    if(sex != SexType.MALE || sex != SexType.FEMALE)
+                    if(employeeDto.Sex.ToLower().Equals(SexType.MALE) || employeeDto.Sex.ToLower().Equals(SexType.FEMALE))
                     {
-                        employeeInformationDto.ResponseFromServer = "Không có giới tính này";
-                        return employeeInformationDto;
+                        sex = employeeDto.Sex.ToLower();
                     }
-                    sex = employeeDto.Sex.ToLower();
+                    else
+                    {
+                        // employeeInformationDto.ResponseFromServer = "Không có giới tính này";
+                        responseFromServer.Append("Không có giới tính này");
+                    }    
                 }
-                var email = "";
-                if(email != null)
+                if(employeeInformationDto.isSuccess)
                 {
-                    if(!ValidateEmail(email))
+                    var newEmployee = new EmployeeInformation
                     {
-                        employeeInformationDto.ResponseFromServer = "Email không đúng định dạng";
-                        return employeeInformationDto;
-                    }
-                    email = employeeDto.Email.ToLower();
-                }    
-                var newEmployee = new EmployeeInformation
-                {
-                    Name = employeeDto.Name,
-                    BirthDay = employeeDto.BirthDay,
-                    Sex = sex,
-                    PhoneNumber = numberPhone,
-                    Email = email,
-                    CreateAt = DateTime.Now,
-                    UpdateAt = DateTime.Now,
-                    Creator = employeeDto.Creator,
-                };
-                _hRMWebContext.EmployeeInformation.Add(newEmployee);
-                _hRMWebContext.SaveChanges();
-                var employee = _hRMWebContext.EmployeeInformation.Where(x => x.PhoneNumber == numberPhone && x.DeleteAt == null).FirstOrDefault();
-                if (employee != null)
-                {
-                    var addAccount = new AddAccountDto
-                    {
+                        Name = employeeDto.Name,
+                        BirthDay = employeeDto.BirthDay,
+                        Sex = sex,
+                        PhoneNumber = numberPhone,
+                        Email = email,
                         CreateAt = DateTime.Now,
-                        Creator = employeeDto.Creator,
-                        Id = employee.Id,
-                        PassWord = employeeDto.Password,
                         UpdateAt = DateTime.Now,
+                        Creator = employeeDto.Creator,
                     };
-                    _accountsService.AddAccount(addAccount);
-                    employeeInformationDto = new EmployeeInformationDto
+                    _hRMWebContext.EmployeeInformation.Add(newEmployee);
+                    _hRMWebContext.SaveChanges();
+                    var employee = _hRMWebContext.EmployeeInformation.Where(x => x.PhoneNumber == numberPhone && x.DeleteAt == null).FirstOrDefault();
+                    if (employee != null)
                     {
-                        Employee = employeeDto,
-                        Account = addAccount,
-                    };
+                        var addAccount = new AddAccountDto
+                        {
+                            CreateAt = DateTime.Now,
+                            Creator = employeeDto.Creator,
+                            Id = employee.Id,
+                            PassWord = employeeDto.Password,
+                            UpdateAt = DateTime.Now,
+                        };
+                        _accountsService.AddAccount(addAccount);
+                        employeeInformationDto = new EmployeeInformationDto
+                        {
+                            Employee = employeeDto,
+                            Account = addAccount,
+                        };
+                    }    
                 }
             }
+            employeeInformationDto.ResponseFromServer = responseFromServer.ToString();
             return employeeInformationDto;
         }
 
@@ -195,7 +224,7 @@ namespace WebHRM.Service
         {
             if (updateEmployeeDto.Name != null && updateEmployeeDto.BirthDay != null && updateEmployeeDto.PhoneNumber != null)
             {
-                var numberPhone = updateEmployeeDto.PhoneNumber;
+                string numberPhone = updateEmployeeDto.PhoneNumber;
                 if (isPhoneNumber(updateEmployeeDto.PhoneNumber))
                 {
                     numberPhone = ChangeAreaCode(numberPhone);
@@ -212,7 +241,7 @@ namespace WebHRM.Service
                 {
                     return "Chưa đủ 18 tuổi";
                 }
-                var email = updateEmployeeDto.Email.ToLower();
+                string email = updateEmployeeDto.Email.ToLower();
                 if (email != null)
                 {
                     if (!ValidateEmail(email))
@@ -220,7 +249,7 @@ namespace WebHRM.Service
                         return "Email không đúng định dạng";
                     }
                 }
-                var sex = updateEmployeeDto.Sex.ToLower();
+                string sex = updateEmployeeDto.Sex.ToLower();
                 if (updateEmployeeDto.Sex != null)
                 {
                     if (sex != SexType.MALE || sex != SexType.FEMALE)

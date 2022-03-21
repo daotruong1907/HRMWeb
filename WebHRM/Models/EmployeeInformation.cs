@@ -12,7 +12,10 @@ namespace WebHRM.Models
         public string Name { get; set; }
         public DateTime BirthDay { get; set; }
         public string? Sex { get; set; }
+        [Required]
         public string PhoneNumber { get; set; }
+        [EmailAddress]
+        [Required]
         public string? Email { get; set; }
         public string Creator { get; set; }
         public DateTime CreateAt { get; set; }

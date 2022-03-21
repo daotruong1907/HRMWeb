@@ -16,7 +16,7 @@ namespace WebHRM.Controllers
         }
 
         [HttpPost("Login")]
-        public bool Login(LoginDto loginDto)
+        public ResponseLogin Login(LoginDto loginDto)
         {
             var result = _loginService.Login(loginDto);
             return result;
