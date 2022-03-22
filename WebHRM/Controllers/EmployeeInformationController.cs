@@ -25,7 +25,7 @@ namespace WebHRM.Controllers
         }
 
         [HttpPost("UpdateEmployee")]
-        public string UpdateEmployee(UpdateEmployeeDto updateEmployeeDto)
+        public ResponseUpdateEmployee UpdateEmployee(UpdateEmployeeDto updateEmployeeDto)
         {
             var result = _employeeService.UpdateEmployee(updateEmployeeDto);
             return result;
@@ -42,6 +42,20 @@ namespace WebHRM.Controllers
         public ListResponseSearchEmployee SearchEmployee(RequestSearchEmployee requestSearchEmployee)
         {
             var result = _employeeService.SearchEmployee(requestSearchEmployee);
+            return result;
+        }
+
+        [HttpGet("GetEmployeeeById")]
+        public ResponseSearchEmployee GetEmployeeeById(int id)
+        {
+            var result = _employeeService.GetEmployeeeById(id);
+            return result;
+        }
+
+        [HttpGet("GetCountEmployeee")]
+        public int GetCountEmployeee()
+        {
+            var result = _employeeService.GetCountEmployeee();
             return result;
         }
     }

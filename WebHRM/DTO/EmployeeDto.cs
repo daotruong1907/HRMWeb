@@ -22,6 +22,13 @@
         public bool isSuccess { get; set; } = true;
     }
 
+    public class ResponseUpdateEmployee
+    {
+        public UpdateEmployeeDto UpdateEmployeeDto { get; set; } = new UpdateEmployeeDto();
+        public string ResponseFromServer { get; set; }
+        public bool isSuccess { get; set; } = true;
+    }
+
     public class UpdateEmployeeDto
     {
         public int Id { get; set; }
