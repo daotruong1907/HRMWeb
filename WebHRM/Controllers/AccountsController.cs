@@ -17,9 +17,9 @@ namespace WebHRM.Controllers
         }
 
         [HttpPost("DeleteAccount")]
-        public Accounts DeleteAccount(int id)
+        public Accounts DeleteAccount(int id, int eraserId)
         {
-            var result = _accountsService.DeleteAccount(id);
+            var result = _accountsService.DeleteAccount(id, eraserId);
             return result;
         }
 

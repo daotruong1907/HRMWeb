@@ -32,9 +32,9 @@ namespace WebHRM.Controllers
         }
 
         [HttpDelete("DeleteEmployee")]
-        public bool DeleteEmployee(int id)
+        public bool DeleteEmployee(int id, int eraserId)
         {
-            var result = _employeeService.DeleteEmployee(id);
+            var result = _employeeService.DeleteEmployee(id, eraserId);
             return result;
         }
 
@@ -58,5 +58,12 @@ namespace WebHRM.Controllers
             var result = _employeeService.GetCountEmployeee();
             return result;
         }
+        [HttpPost("GetAge")]
+        public int Age(DateTime birthday)
+        {
+            var result = _employeeService.Age(birthday);
+            return result;
+        }
+        
     }
 }

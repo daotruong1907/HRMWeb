@@ -24,7 +24,7 @@ namespace WebHRM.Service
             var responseLogin = new ResponseLogin();
             if(loginDto != null)
             {
-                var checkUser = _hRMWebContext.EmployeeInformation.Where(x => (x.PhoneNumber == loginDto.UserName || x.Email == loginDto.UserName) && x.DeleteAt == null ).FirstOrDefault();
+                var checkUser = _hRMWebContext.EmployeeInformation.Where(x => (x.PhoneNumber == loginDto.UserName || x.Email == loginDto.UserName) && x.IsDeleted == false).FirstOrDefault();
                 if(checkUser != null)
                 {
                     var checkPass = _hRMWebContext.Accounts.Where(x => x.Id == checkUser.Id).FirstOrDefault();
@@ -35,7 +35,7 @@ namespace WebHRM.Service
                         {
                             //GenerateJSONWebToken(loginDto);
                            responseLogin.IsSuccess =  true;
-                           responseLogin.Name = checkUser.Name;
+                           responseLogin.Id = checkUser.Id;
                         }
                         else
                         {

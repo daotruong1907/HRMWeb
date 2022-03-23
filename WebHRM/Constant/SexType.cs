@@ -2,7 +2,8 @@
 {
     public class SexType
     {
-        public const string MALE = "male";
-        public const string FEMALE = "female";
+        public const int MALE = 0;
+        public const int FEMALE = 1;
+        public const int LGBT = 2;
     }
 }

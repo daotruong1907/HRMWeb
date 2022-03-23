@@ -60,21 +60,9 @@ namespace WebHRM.Service
                     Id = account.Id,
                     CreateAt = DateTime.Now,
                     UpdateAt = DateTime.Now,
-                    Creator = account.Creator,
+                    CreatorId = account.CreatorId,
                     PassWord = hashPassword,
                 };
-                //var newEmployee = new EmployeeInformation
-                //{
-                //    CreateAt = DateTime.Now,
-                //    UpdateAt= DateTime.Now,
-                //    BirthDay = account.EmployeeInformation.BirthDay,
-                //    Creator = account.Creator,
-                //    PhoneNumber = account.EmployeeInformation.PhoneNumber,
-                //    Email = account.EmployeeInformation.Email,  
-                //    Name = account.EmployeeInformation.Name,    
-                //    PassWord = account.EmployeeInformation?.PassWord,
-                //    Sex = account.EmployeeInformation.Sex,
-                //};
                 _hRMWebContext.Add(newAccount);
                 _hRMWebContext.SaveChanges();
                 return newAccount;
@@ -96,11 +84,11 @@ namespace WebHRM.Service
             var oldAccount = new Accounts();
             if (account != null)
             {
-                var oldaccount = _hRMWebContext.Accounts.Where(x => x.Id == account.Id && x.DeleteAt != null).FirstOrDefault();
+                var oldaccount = _hRMWebContext.Accounts.Where(x => x.Id == account.Id && x.IsDeleted == false).FirstOrDefault();
                 if (oldaccount != null)
                 {
                     oldaccount.UpdateAt = DateTime.Now;
-                    oldaccount.Repairer = account.Repairer;
+                    oldaccount.RepairerId = account.RepairerId;
                     oldaccount.PassWord = account.PassWord;
                 }
                 _hRMWebContext.SaveChanges();
@@ -116,12 +104,14 @@ namespace WebHRM.Service
         /// Name Date Comments
         /// truongdv 16/03/2022 created
         /// </Modified>
-        public Accounts DeleteAccount(int Id)
+        public Accounts DeleteAccount(int Id, int eraserId)
         {
-            var oldaccount = _hRMWebContext.Accounts.Where(x => x.Id == Id && x.DeleteAt != null).FirstOrDefault();
+            var oldaccount = _hRMWebContext.Accounts.Where(x => x.Id == Id && x.IsDeleted == false).FirstOrDefault();
             if (oldaccount != null)
             {
                 oldaccount.DeleteAt = DateTime.Now;
+                oldaccount.IsDeleted = true;
+                oldaccount.EraserId = eraserId;
             }
             _hRMWebContext.SaveChanges();
             return oldaccount;
@@ -136,7 +126,7 @@ namespace WebHRM.Service
         /// </Modified>
         public List<Accounts> GetAllAccounts()
         {
-            var listAccount = _hRMWebContext.Accounts.Where(x => x.DeleteAt == null).OrderByDescending(x => x.UpdateAt).ToList();
+            var listAccount = _hRMWebContext.Accounts.Where(x => x.IsDeleted == false).OrderByDescending(x => x.UpdateAt).ToList();
             return listAccount;
         }
         /// <summary>Gets the accounts.</summary>
@@ -150,10 +140,11 @@ namespace WebHRM.Service
         /// </Modified>
         public ResponsePageAccountDto GetAccounts(PageDto pageDto)
         {
+            var respone = new ResponsePageAccountDto();
             if (pageDto != null)
             {
                 var ItemQuantity = (pageDto.PageQuantity - 1) * pageDto.ItemQuantityInPage;
-                var listAccount = _hRMWebContext.Accounts.Where(x => x.DeleteAt == null).OrderByDescending(x => x.UpdateAt).Skip(ItemQuantity).Take(pageDto.ItemQuantityInPage).ToList();
+                var listAccount = _hRMWebContext.Accounts.Where(x => x.IsDeleted == false).OrderByDescending(x => x.UpdateAt).Skip(ItemQuantity).Take(pageDto.ItemQuantityInPage).ToList();
                 var allAccount = new AllAccountDto
                 {
                     ItemQuantityInPage = pageDto.ItemQuantityInPage,
@@ -161,14 +152,13 @@ namespace WebHRM.Service
                     TotalItem = _hRMWebContext.Accounts.Count(),
                     TotalPage = Math.Ceiling((decimal)_hRMWebContext.Accounts.Count() / pageDto.ItemQuantityInPage)
                 };
-                var respone = new ResponsePageAccountDto
+                 respone = new ResponsePageAccountDto
                 {
                     Accounts = listAccount,
                     AllAccount = allAccount,
                 };
-                return respone;
             }
-            return null;
+            return respone;
         }
     }
 }

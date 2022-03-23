@@ -12,7 +12,7 @@ namespace WebHRM.DTO
     {
         public int Id { get; set; }
         public string PassWord { get; set; }
-        public string Creator { get; set; }
+        public int CreatorId { get; set; }
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }
     }
@@ -22,7 +22,7 @@ namespace WebHRM.DTO
         public int Id { get; set; }  
         public string PassWord { get; set; }
         public DateTime UpdateAt { get; set; }
-        public string Repairer { get; set; }
+        public int RepairerId { get; set; }
     }
 
     public class AllAccountDto
