@@ -15,6 +15,7 @@ namespace WebHRM.Service
         /// <param name="input">The input.</param>
         /// <returns>
         ///   <br />
+        ///   mã hóa mật khẩu theo md5
         /// </returns>
         /// <Modified>
         /// Name Date Comments
@@ -44,6 +45,7 @@ namespace WebHRM.Service
         /// <param name="account">The account.</param>
         /// <returns>
         ///   <br />
+        ///   thêm account
         /// </returns>
         /// <Modified>
         /// Name Date Comments
@@ -74,6 +76,7 @@ namespace WebHRM.Service
         /// <param name="account">The account.</param>
         /// <returns>
         ///   <br />
+        ///   sửa account
         /// </returns>
         /// <Modified>
         /// Name Date Comments
@@ -99,6 +102,7 @@ namespace WebHRM.Service
         /// <param name="Id">The identifier.</param>
         /// <returns>
         ///   <br />
+        ///   xóa một account
         /// </returns>
         /// <Modified>
         /// Name Date Comments
@@ -119,6 +123,7 @@ namespace WebHRM.Service
         /// <summary>Gets all accounts.</summary>
         /// <returns>
         ///   <br />
+        ///   trả về all account 
         /// </returns>
         /// <Modified>
         /// Name Date Comments
@@ -133,6 +138,7 @@ namespace WebHRM.Service
         /// <param name="pageDto">The page dto.</param>
         /// <returns>
         ///   <br />
+        ///   trả về account có phân trang
         /// </returns>
         /// <Modified>
         /// Name Date Comments

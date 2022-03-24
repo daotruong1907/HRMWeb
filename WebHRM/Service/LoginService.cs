@@ -5,6 +5,7 @@ using System.Text;
 using WebHRM.DTO;
 using WebHRM.Interface;
 using WebHRM.Models;
+using WebHRM.Constant;
 
 namespace WebHRM.Service
 {
@@ -19,6 +20,16 @@ namespace WebHRM.Service
             _accountService = accountService;
             _config = config;
         }
+        /// <summary>Logins the specified login dto.</summary>
+        /// <param name="loginDto">The login dto.</param>
+        /// <returns>
+        ///   <br />
+        ///   trả về id, username, và thông báo từ server để cho fontend xử dụng
+        /// </returns>
+        /// <Modified>
+        /// Name Date Comments
+        /// truongdv 24/03/2022 created
+        /// </Modified>
         public ResponseLogin Login(LoginDto loginDto)
         {
             var responseLogin = new ResponseLogin();
@@ -27,27 +38,65 @@ namespace WebHRM.Service
                 var checkUser = _hRMWebContext.EmployeeInformation.Where(x => (x.PhoneNumber == loginDto.UserName || x.Email == loginDto.UserName) && x.IsDeleted == false).FirstOrDefault();
                 if(checkUser != null)
                 {
-                    var checkPass = _hRMWebContext.Accounts.Where(x => x.Id == checkUser.Id).FirstOrDefault();
+                    var checkPass = _hRMWebContext.Accounts.Where(x => x.Id == checkUser.Id && x.IsDeleted == false).FirstOrDefault();
                     if(checkPass != null)
                     {
-                        var hashPassword = _accountService.CreateMD5(loginDto.Password);
-                        if(hashPassword == checkPass.PassWord)
+                        if(checkPass.LoginFailCount <= LoginConstants.LOGIN_LIMIT)
                         {
-                            //GenerateJSONWebToken(loginDto);
-                           responseLogin.IsSuccess =  true;
-                           responseLogin.Id = checkUser.Id;
+                            var hashPassword = _accountService.CreateMD5(loginDto.Password);
+                            if (hashPassword == checkPass.PassWord)
+                            {
+                                checkPass.LoginFailCount = 0;
+                                _hRMWebContext.SaveChanges();
+                                //GenerateJSONWebToken(loginDto);
+                                responseLogin.IsSuccess = true;
+                                responseLogin.Id = checkUser.Id;
+                                responseLogin.ResponseFromServer = "Đang nhập thành công";
+                            }
+                            else
+                            {
+                                checkPass.LoginFailCount = checkPass.LoginFailCount + 1;
+                                _hRMWebContext.SaveChanges();
+                                responseLogin.IsSuccess = false;
+                                if(checkPass.LoginFailCount>=3)
+                                {
+                                    responseLogin.ResponseFromServer = "Mật khẩu không đúng, bạn đã nhập sai " +checkPass.LoginFailCount+" lần, quá 5 lần tài khoản sẽ bị khóa";
+                                }
+                                else
+                                {
+                                    responseLogin.ResponseFromServer = "Mật khẩu không đúng";
+                                }
+                            }
                         }
                         else
                         {
+                            responseLogin.ResponseFromServer = "Tài khoản đã bị khóa do đăng nhập sai quá nhiều, vui lòng liên hệ phòng IT để được hỗ trợ";
                             responseLogin.IsSuccess = false;
                         }
                     }
                 }
+                else
+                {
+                    responseLogin.ResponseFromServer = "Tài khoản hoặc mật khẩu không hợp lệ";
+                    responseLogin.IsSuccess = false;
+                }
+              
                 //Thêm thông báo tài khoản không tồn tại
             }
             return responseLogin;
         }
 
+        /// <summary>Generates the json web token.</summary>
+        /// <param name="userInfo">The user information.</param>
+        /// <returns>
+        ///   <br />
+        ///   /Trả về token để đăng nhập
+        ///   chưa sử dụng đến, sẽ dùng ở phần sau
+        /// </returns>
+        /// <Modified>
+        /// Name Date Comments
+        /// truongdv 24/03/2022 created
+        /// </Modified>
         private string GenerateJSONWebToken(LoginDto userInfo)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));

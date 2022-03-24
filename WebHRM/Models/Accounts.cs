@@ -10,6 +10,8 @@ namespace WebHRM.Models
         public int Id { get; set; }
 
         public string PassWord { get; set; }
+
+        public int LoginFailCount { get; set; }
         
         public int CreatorId { get; set; }
 

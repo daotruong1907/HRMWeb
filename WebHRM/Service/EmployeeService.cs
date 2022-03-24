@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using WebHRM.Constant;
@@ -19,11 +21,26 @@ namespace WebHRM.Service
     {
         private readonly HRMContext _hRMWebContext;
         private readonly IAccountsService _accountsService;
+        /// <summary>Initializes a new instance of the <see cref="EmployeeService" /> class.</summary>
+        /// <param name="hRMContext">The h rm context.</param>
+        /// <param name="accountsService">The accounts service.</param>
+        /// <Modified>
+        /// Name Date Comments
+        /// truongdv 24/03/2022 created
+        /// </Modified>
         public EmployeeService(HRMContext hRMContext, IAccountsService accountsService)
         {
             _hRMWebContext = hRMContext;
             _accountsService = accountsService;
         }
+        /// <summary>Determines whether the specified p value is number.</summary>
+        /// <param name="pValue">The p value.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified p value is number; otherwise, <c>false</c>.</returns>
+        /// <Modified>
+        /// Name Date Comments
+        /// truongdv 24/03/2022 created
+        /// </Modified>
         public bool IsNumber(string pValue)
         {
             foreach (Char c in pValue)
@@ -33,6 +50,14 @@ namespace WebHRM.Service
             }
             return true;
         }
+        /// <summary>Determines whether [is phone number] [the specified phone number].</summary>
+        /// <param name="phoneNumber">The phone number.</param>
+        /// <returns>
+        ///   <c>true</c> if [is phone number] [the specified phone number]; otherwise, <c>false</c>.</returns>
+        /// <Modified>
+        /// Name Date Comments
+        /// truongdv 24/03/2022 created
+        /// </Modified>
         public bool IsPhoneNumber(string phoneNumber)
         {
             if (!string.IsNullOrEmpty(phoneNumber))
@@ -84,6 +109,15 @@ namespace WebHRM.Service
             }
             return false;
         }
+        /// <summary>Changes the area code.</summary>
+        /// <param name="phoneNumber">The phone number.</param>
+        /// <returns>
+        ///   <br />
+        /// </returns>
+        /// <Modified>
+        /// Name Date Comments
+        /// truongdv 24/03/2022 created
+        /// </Modified>
         public string ChangeAreaCode(string phoneNumber)
         {
             if (!string.IsNullOrEmpty(phoneNumber))
@@ -98,6 +132,15 @@ namespace WebHRM.Service
             }
             return phoneNumber;
         }
+        /// <summary>Checks the age.</summary>
+        /// <param name="birthday">The birthday.</param>
+        /// <returns>
+        ///   <br />
+        /// </returns>
+        /// <Modified>
+        /// Name Date Comments
+        /// truongdv 24/03/2022 created
+        /// </Modified>
         public bool CheckAge(DateTime birthday)
         {
             //fixme: dùng hàm subtract để trừ ngày
@@ -239,6 +282,15 @@ namespace WebHRM.Service
             return employeeInformationDto;
         }
 
+        /// <summary>Updates the employee.</summary>
+        /// <param name="updateEmployeeDto">The update employee dto.</param>
+        /// <returns>
+        ///   <br />
+        /// </returns>
+        /// <Modified>
+        /// Name Date Comments
+        /// truongdv 24/03/2022 created
+        /// </Modified>
         public ResponseUpdateEmployee UpdateEmployee(UpdateEmployeeDto updateEmployeeDto)
         {
             var responseUpdateEmployee = new ResponseUpdateEmployee();
@@ -302,12 +354,11 @@ namespace WebHRM.Service
                             oldEmployee.BirthDay = updateEmployeeDto.BirthDay;
                         }
                     }
-                    int? sex = 3;
                     if (updateEmployeeDto.Sex != null)
                     {
                         if (updateEmployeeDto.Sex == SexType.FEMALE || updateEmployeeDto.Sex == SexType.MALE || updateEmployeeDto.Sex == SexType.LGBT)
                         {
-                            sex = updateEmployeeDto.Sex;
+                            oldEmployee.Sex = updateEmployeeDto.Sex;
                         }
                         else
                         {
@@ -357,6 +408,15 @@ namespace WebHRM.Service
             return false;
         }
 
+        /// <summary>Validates the email.</summary>
+        /// <param name="email">The email.</param>
+        /// <returns>
+        ///   <br />
+        /// </returns>
+        /// <Modified>
+        /// Name Date Comments
+        /// truongdv 24/03/2022 created
+        /// </Modified>
         private bool ValidateEmail(string email)
         {
 
@@ -368,6 +428,15 @@ namespace WebHRM.Service
                 return false;
         }
 
+        /// <summary>Searchs the employee.</summary>
+        /// <param name="requestSearchEmployee">The request search employee.</param>
+        /// <returns>
+        ///   <br />
+        /// </returns>
+        /// <Modified>
+        /// Name Date Comments
+        /// truongdv 24/03/2022 created
+        /// </Modified>
         public ListResponseSearchEmployee SearchEmployee(RequestSearchEmployee requestSearchEmployee)
         {
             ListResponseSearchEmployee responseSearchEmployees = new ListResponseSearchEmployee();
@@ -432,6 +501,15 @@ namespace WebHRM.Service
             return responseSearchEmployees;
         }
 
+        /// <summary>Gets the employeee by identifier.</summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns>
+        ///   <br />
+        /// </returns>
+        /// <Modified>
+        /// Name Date Comments
+        /// truongdv 24/03/2022 created
+        /// </Modified>
         public ResponseSearchEmployee GetEmployeeeById(int id)
         {
             var response = new ResponseSearchEmployee();
@@ -450,6 +528,34 @@ namespace WebHRM.Service
             }
             return response;
         }
+
+        //public ResponseSearchEmployee GetEmployeeeByIdUseStoreProcedure(int id)
+        //{
+        //    try
+        //    {
+        //        using (var context = new DbContext())
+        //        {
+        //            var clientIdParameter = new SqlParameter("@id", 4);
+
+        //            var result = context.Database.SqlQuery<ResponseSearchEmployee>("getAllEmployee @id", id)
+        //                .ToList();
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+
+        //}
+
+        /// <summary>Gets the count employeee.</summary>
+        /// <returns>
+        ///   <br />
+        /// </returns>
+        /// <Modified>
+        /// Name Date Comments
+        /// truongdv 24/03/2022 created
+        /// </Modified>
         public int GetCountEmployeee()
         {
             var employee = _hRMWebContext.EmployeeInformation.Where(x => x.IsDeleted == false).Count();
