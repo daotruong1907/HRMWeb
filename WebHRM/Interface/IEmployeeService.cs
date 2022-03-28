@@ -18,8 +18,10 @@ namespace WebHRM.Interface
         bool IsPhoneNumber(string phoneNumber);
 
         ResponseSearchEmployee GetEmployeeeById(int id);
+        ListResponseSearchEmployee GetAllEmployeee();
 
         int GetCountEmployeee();
         int Age(DateTime birthday);
+        IEnumerable<EmployeeInformation> GetEmployeeeByIdUseStoreProcedure(int id);
     }
 }

@@ -4,6 +4,6 @@ namespace WebHRM.Interface
 {
     public interface ILoginService
     {
-        ResponseLogin Login(LoginDto loginDto);
+        ResponseLoginClone Login(LoginDto loginDto);
     }
 }

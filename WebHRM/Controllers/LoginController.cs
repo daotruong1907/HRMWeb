@@ -16,7 +16,7 @@ namespace WebHRM.Controllers
         }
 
         [HttpPost("Login")]
-        public ResponseLogin Login(LoginDto loginDto)
+        public ResponseLoginClone Login(LoginDto loginDto)
         {
             var result = _loginService.Login(loginDto);
             return result;

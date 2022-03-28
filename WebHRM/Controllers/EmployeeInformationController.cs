@@ -52,6 +52,20 @@ namespace WebHRM.Controllers
             return result;
         }
 
+        [HttpGet("GetAllEmployeee")]
+        public ListResponseSearchEmployee GetAllEmployeee()
+        {
+            var result = _employeeService.GetAllEmployeee();
+            return result;
+        }
+
+        [HttpGet("GetEmployeeeByIdUseStoreProcedure")]
+        public IEnumerable<EmployeeInformation> GetEmployeeeByIdUseStoreProcedure(int id)
+        {
+            var result = _employeeService.GetEmployeeeByIdUseStoreProcedure (id);
+            return result;
+        }
+
         [HttpGet("GetCountEmployeee")]
         public int GetCountEmployeee()
         {

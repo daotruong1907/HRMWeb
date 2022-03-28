@@ -30,18 +30,76 @@ namespace WebHRM.Service
         /// Name Date Comments
         /// truongdv 24/03/2022 created
         /// </Modified>
-        public ResponseLogin Login(LoginDto loginDto)
+        //public ResponseLogin Login(LoginDto loginDto)
+        //{
+        //    var responseLogin = new ResponseLogin();
+        //    if(loginDto != null)
+        //    {
+        //        var checkUser = _hRMWebContext.EmployeeInformation.Where(x => (x.PhoneNumber == loginDto.UserName || x.Email == loginDto.UserName) && x.IsDeleted == false).FirstOrDefault();
+        //        if(checkUser != null)
+        //        {
+        //            var checkPass = _hRMWebContext.Accounts.Where(x => x.Id == checkUser.Id && x.IsDeleted == false).FirstOrDefault();
+        //            if(checkPass != null)
+        //            {
+        //                if(checkPass.LoginFailCount <= LoginConstants.LOGIN_LIMIT)
+        //                {
+        //                    var hashPassword = _accountService.CreateMD5(loginDto.Password);
+        //                    if (hashPassword == checkPass.PassWord)
+        //                    {
+        //                        checkPass.LoginFailCount = 0;
+        //                        _hRMWebContext.SaveChanges();
+        //                        //GenerateJSONWebToken(loginDto);
+        //                        responseLogin.IsSuccess = true;
+        //                        responseLogin.Id = checkUser.Id;
+        //                        responseLogin.ResponseFromServer = "Đang nhập thành công";
+        //                    }
+        //                    else
+        //                    {
+        //                        checkPass.LoginFailCount = checkPass.LoginFailCount + 1;
+        //                        _hRMWebContext.SaveChanges();
+        //                        responseLogin.IsSuccess = false;
+        //                        if(checkPass.LoginFailCount>=3)
+        //                        {
+        //                            responseLogin.ResponseFromServer = "Mật khẩu không đúng, bạn đã nhập sai " +checkPass.LoginFailCount+" lần, quá 5 lần tài khoản sẽ bị khóa";
+        //                        }
+        //                        else
+        //                        {
+        //                            responseLogin.ResponseFromServer = "Mật khẩu không đúng";
+        //                        }
+        //                    }
+        //                }
+        //                else
+        //                {
+        //                    responseLogin.ResponseFromServer = "Tài khoản đã bị khóa do đăng nhập sai quá nhiều, vui lòng liên hệ phòng IT để được hỗ trợ";
+        //                    responseLogin.IsSuccess = false;
+        //                }
+        //            }
+        //        }
+        //        else
+        //        {
+        //            responseLogin.ResponseFromServer = "Tài khoản hoặc mật khẩu không hợp lệ";
+        //            responseLogin.IsSuccess = false;
+        //        }
+
+        //        //Thêm thông báo tài khoản không tồn tại
+        //    }
+        //    return responseLogin;
+        //}
+
+
+        public ResponseLoginClone Login(LoginDto loginDto)
         {
-            var responseLogin = new ResponseLogin();
-            if(loginDto != null)
+            var responseLogin = new ResponseLoginClone();
+            var data = new Data();
+            if (loginDto != null)
             {
                 var checkUser = _hRMWebContext.EmployeeInformation.Where(x => (x.PhoneNumber == loginDto.UserName || x.Email == loginDto.UserName) && x.IsDeleted == false).FirstOrDefault();
-                if(checkUser != null)
+                if (checkUser != null)
                 {
                     var checkPass = _hRMWebContext.Accounts.Where(x => x.Id == checkUser.Id && x.IsDeleted == false).FirstOrDefault();
-                    if(checkPass != null)
+                    if (checkPass != null)
                     {
-                        if(checkPass.LoginFailCount <= LoginConstants.LOGIN_LIMIT)
+                        if (checkPass.LoginFailCount <= LoginConstants.LOGIN_LIMIT)
                         {
                             var hashPassword = _accountService.CreateMD5(loginDto.Password);
                             if (hashPassword == checkPass.PassWord)
@@ -49,18 +107,31 @@ namespace WebHRM.Service
                                 checkPass.LoginFailCount = 0;
                                 _hRMWebContext.SaveChanges();
                                 //GenerateJSONWebToken(loginDto);
-                                responseLogin.IsSuccess = true;
+                                responseLogin.ResponseCode = 0;
                                 responseLogin.Id = checkUser.Id;
                                 responseLogin.ResponseFromServer = "Đang nhập thành công";
+                                responseLogin.Status = 1;
+                                responseLogin.UserMessage = "";
+                                data.ResponseFromServerr = "OK";
+                                data.Id = checkUser.Id;
+                                data.IsSuccess = true;
+                                data.Status = 1;
+                                responseLogin.Data = data;
                             }
                             else
                             {
                                 checkPass.LoginFailCount = checkPass.LoginFailCount + 1;
                                 _hRMWebContext.SaveChanges();
-                                responseLogin.IsSuccess = false;
-                                if(checkPass.LoginFailCount>=3)
+                                responseLogin.ResponseCode = 1;
+                                responseLogin.Status = 0;
+                                data.ResponseFromServerr = "Fail";
+                                data.Id = checkUser.Id;
+                                data.IsSuccess = true;
+                                data.Status = 0;
+                                responseLogin.Data = data;
+                                if (checkPass.LoginFailCount >= 3)
                                 {
-                                    responseLogin.ResponseFromServer = "Mật khẩu không đúng, bạn đã nhập sai " +checkPass.LoginFailCount+" lần, quá 5 lần tài khoản sẽ bị khóa";
+                                    responseLogin.ResponseFromServer = "Mật khẩu không đúng, bạn đã nhập sai " + checkPass.LoginFailCount + " lần, quá 5 lần tài khoản sẽ bị khóa";
                                 }
                                 else
                                 {
@@ -71,16 +142,30 @@ namespace WebHRM.Service
                         else
                         {
                             responseLogin.ResponseFromServer = "Tài khoản đã bị khóa do đăng nhập sai quá nhiều, vui lòng liên hệ phòng IT để được hỗ trợ";
-                            responseLogin.IsSuccess = false;
+                            responseLogin.ResponseCode = 1;
+                            responseLogin.Status = 0;
+                            data.ResponseFromServerr = "Fail";
+                            data.Id = checkUser.Id;
+                            data.IsSuccess = true;
+                            data.Status = 0;
+
+                            responseLogin.Data = data;
                         }
                     }
                 }
                 else
                 {
                     responseLogin.ResponseFromServer = "Tài khoản hoặc mật khẩu không hợp lệ";
-                    responseLogin.IsSuccess = false;
+                    responseLogin.ResponseCode = 1;
+                    responseLogin.Status = 0;
+                    data.ResponseFromServerr = "Fail";
+                    data.Id = checkUser.Id;
+                    data.IsSuccess = true;
+                    data.Status = 0;
+
+                    responseLogin.Data = data;
                 }
-              
+
                 //Thêm thông báo tài khoản không tồn tại
             }
             return responseLogin;

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -21,6 +22,7 @@ namespace WebHRM.Service
     {
         private readonly HRMContext _hRMWebContext;
         private readonly IAccountsService _accountsService;
+        //private readonly HRMStoreContext _hRMWebContextStore;
         /// <summary>Initializes a new instance of the <see cref="EmployeeService" /> class.</summary>
         /// <param name="hRMContext">The h rm context.</param>
         /// <param name="accountsService">The accounts service.</param>
@@ -32,6 +34,7 @@ namespace WebHRM.Service
         {
             _hRMWebContext = hRMContext;
             _accountsService = accountsService;
+
         }
         /// <summary>Determines whether the specified p value is number.</summary>
         /// <param name="pValue">The p value.</param>
@@ -209,7 +212,7 @@ namespace WebHRM.Service
                 }
                 if (string.IsNullOrEmpty(email))
                 {
-                    var checkUnique = _hRMWebContext.EmployeeInformation.Where(x => x.PhoneNumber == numberPhone && x.IsDeleted == false ).FirstOrDefault();
+                    var checkUnique = _hRMWebContext.EmployeeInformation.Where(x => x.PhoneNumber == numberPhone && x.IsDeleted == false).FirstOrDefault();
                     if (checkUnique != null)
                     {
                         //employeeInformationDto.ResponseFromServer = "Email hoặc số điện thoại này đã được " + checkUnique.Name + " sử dụng";
@@ -324,7 +327,7 @@ namespace WebHRM.Service
                             responseUpdateEmployee.isSuccess = false;
                         }
                     }
-                    if(!oldEmployee.Email.Equals(updateEmployeeDto.Email))
+                    if (!oldEmployee.Email.Equals(updateEmployeeDto.Email))
                     {
                         if (!string.IsNullOrEmpty(updateEmployeeDto.Email))
                         {
@@ -368,16 +371,16 @@ namespace WebHRM.Service
                     oldEmployee.RepairerId = updateEmployeeDto.RepairerId;
                     oldEmployee.IsUpdated = true;
                     oldEmployee.UpdateAt = DateTime.Now;
-                    if(responseUpdateEmployee.isSuccess == false)
+                    if (responseUpdateEmployee.isSuccess == false)
                     {
                         responseUpdateEmployee.UpdateEmployeeDto = updateEmployeeDto;
                         responseUpdateEmployee.ResponseFromServer = responseFromServer.ToString();
                         return responseUpdateEmployee;
-                    }    
+                    }
                     _hRMWebContext.SaveChanges();
                     updateEmployeeDto.UpdateAt = DateTime.Now;
                     updateEmployeeDto.Id = oldEmployee.Id;
-                }   
+                }
             }
             responseUpdateEmployee.UpdateEmployeeDto = updateEmployeeDto;
             responseUpdateEmployee.ResponseFromServer = responseFromServer.ToString();
@@ -393,7 +396,7 @@ namespace WebHRM.Service
         /// Name Date Comments
         /// truongdv 23/03/2022 created
         /// </Modified>
-        public bool DeleteEmployee(int id , int eraserId)
+        public bool DeleteEmployee(int id, int eraserId)
         {
             var oldEmployee = _hRMWebContext.EmployeeInformation.Where(x => x.Id == id && x.IsDeleted == false).FirstOrDefault();
             if (oldEmployee != null)
@@ -529,24 +532,60 @@ namespace WebHRM.Service
             return response;
         }
 
-        //public ResponseSearchEmployee GetEmployeeeByIdUseStoreProcedure(int id)
-        //{
-        //    try
-        //    {
-        //        using (var context = new DbContext())
-        //        {
-        //            var clientIdParameter = new SqlParameter("@id", 4);
+        public ListResponseSearchEmployee GetAllEmployeee()
+        {
+            var listResponse = new ListResponseSearchEmployee();
+            var employee = _hRMWebContext.EmployeeInformation.Where(x => x.IsDeleted == false).ToList();
+            foreach(var emp in employee)
+            {
+               var response = new ResponseSearchEmployee()
+                {
+                    Id = emp.Id,
+                    BirthDay = emp.BirthDay,
+                    Email = emp.Email,
+                    Name = emp.Name,
+                    PhoneNumber = emp.PhoneNumber,
+                    Sex = emp.Sex,
+                };
+                listResponse.ResponseFromServer = "oke";
+                listResponse.ResponseSearchEmployees.Add(response);
+            }
+            return listResponse;
+        }
 
-        //            var result = context.Database.SqlQuery<ResponseSearchEmployee>("getAllEmployee @id", id)
-        //                .ToList();
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-
-        //}
+        public IEnumerable<EmployeeInformation> GetEmployeeeByIdUseStoreProcedure(int id)
+        {
+            var response = new List<EmployeeInformation>();
+            try
+            {
+                var clientIdParameter = new SqlParameter("@id", id);
+                var courses = _hRMWebContext.EmployeeInformation.FromSqlRaw("exec dbo.[getAllEmployee] @id", clientIdParameter).AsEnumerable();
+                // .Select(x =>
+                //new EmployeeInformation
+                //{
+                //    Id = x.Id,
+                //    BirthDay = x.BirthDay,
+                //    Email = x.Email,
+                //    Name = x.Name,
+                //    PhoneNumber = x.PhoneNumber,
+                //    CreateAt = x.CreateAt,
+                //    CreatorId = x.CreatorId,
+                //    Sex = x.Sex,
+                //    RepairerId = x.RepairerId,
+                //    UpdateAt = x.UpdateAt,
+                //    IsUpdated = x.IsUpdated,
+                //    DeleteAt = x.DeleteAt,
+                //    EraserId = x.EraserId,
+                //    IsDeleted = x.IsDeleted,
+                //});
+                return courses;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return response;
+        }
 
         /// <summary>Gets the count employeee.</summary>
         /// <returns>
